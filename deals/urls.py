@@ -18,7 +18,8 @@ from deals.views import *
 
 urlpatterns = [
     path('upload_file', upload_file),
-    path('deal/create', DealCreateView.as_view()),
+    path('spent_users', DealSpentUsersView.as_view()),
     path('all', DealListView.as_view()),
+    path('deal/create', DealCreateView.as_view()),
     path('deal/detail/<int:pk>', DealDetailView.as_view()),
 ]

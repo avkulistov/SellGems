@@ -15,7 +15,7 @@ def handle_uploaded_file(request):
 
     for line in csv_reader:
         # print(line)
-        Deal.objects.update_or_create(
+        Deal.objects.create(
             customer=line[0],
             item=line[1],
             total=line[2],

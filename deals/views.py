@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from rest_framework import generics
-from deals.serializers import DealCreateSerializer, DealDetailSerializer, DealListSerializer
+from deals.serializers import *
 from deals.models import Deal
 from deals.forms import UploadFileForm
 from django.http import HttpResponseRedirect
 from deals.handles import handle_uploaded_file
+from django.db.models import Sum, Count
 
 
 class DealCreateView(generics.CreateAPIView):
@@ -14,6 +15,11 @@ class DealCreateView(generics.CreateAPIView):
 class DealListView(generics.ListAPIView):
     serializer_class = DealListSerializer
     queryset = Deal.objects.all()
+
+
+class DealSpentUsersView(generics.ListAPIView):
+    serializer_class = DealSpentUsersSerializer
+    queryset = Deal.objects.values('customer').annotate(total_sum=Sum('total'), gems=Count('item')).order_by('-total_sum')[:5]
 
 
 class DealDetailView(generics.RetrieveUpdateDestroyAPIView):
