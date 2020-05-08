@@ -18,8 +18,27 @@ class DealListView(generics.ListAPIView):
 
 
 class DealSpentUsersView(generics.ListAPIView):
+    @staticmethod
+    def get_deals():
+        top_5 = list(Deal.objects.values('customer').annotate(total_sum=Sum('total')).order_by('-total_sum')[:5])
+        all_deals = Deal.objects.all()
+        for t_sale in top_5:
+            items = [sale.item for sale in all_deals if sale.customer == t_sale['customer']]
+            t_sale['unique_items'] = list(set(items))
+        for t_sale in top_5:
+            gems = set()
+            for other_sale in top_5:
+                if t_sale['customer'] == other_sale['customer']:
+                    continue
+                intersection = set(t_sale['unique_items']) & set(other_sale['unique_items'])
+                if len(intersection):
+                    gems.update(intersection)
+            t_sale['gems'] = list(gems)
+
+        return top_5
+
     serializer_class = DealSpentUsersSerializer
-    queryset = Deal.objects.values('customer').annotate(total_sum=Sum('total'), gems=Count('item')).order_by('-total_sum')[:5]
+    queryset = get_deals.__func__()
 
 
 class DealDetailView(generics.RetrieveUpdateDestroyAPIView):
